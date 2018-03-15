@@ -7,7 +7,7 @@ void iswap (int *n1, int *n2) {
     *n2 = temp;
 }
 
-std::vector<int> sortArray (std::vector<int> v, int n) {
+void sortArray (std::vector<int>& v, int n) {
 	// ----------- Сортировка ------------
 	// Сортирует по возрастанию. Чтобы получить сортировку по убыванию,
 	// поменяйте знаки сравнения в строчках, помеченных /*(знак)*/
@@ -43,5 +43,4 @@ std::vector<int> sortArray (std::vector<int> v, int n) {
 	    if (!b)
             ++sh; // Смещение увеличивается, когда на текущем этапе сортировать больше нечего
     } while (sh + 2 < n); // Конец сортировки
-    return v;
 }
