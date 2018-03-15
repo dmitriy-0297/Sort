@@ -2,7 +2,7 @@
 #include <cstdlib>
 #include <vector>
 #include <omp.h>
-#include "sort_plpl.h"
+#include "sort.h"
 
 std::vector<std::vector<int> > divVec(std::vector<int> arr, int n, int div_vec){ // создание v[vec]
     std::vector<std::vector<int> > v;
