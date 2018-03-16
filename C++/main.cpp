@@ -70,7 +70,7 @@ void outTable(std::vector<std::vector<int> > v, int div_vec, int n){
         std::cout << v.at(i).at(0) << " " << v.at(i).at(n/div_vec-1);
         std::cout << '\n';
     }
-    std::cout << '\n';
+    //std::cout << '\n';
 }
 
 int main(){
@@ -84,25 +84,39 @@ int main(){
     std::vector<int> Array;
     randArray(Array, n); //заполнение исходного массива
     std::vector<std::vector <int> > v(divVec(Array, n, div_vec)); //разбиение исходного массива на части
-    outTable(v, div_vec, n);
     start = omp_get_wtime(); //начало сортировки
-    for(int i = 0; i <= div_vec ; i++){ //при тестировании выяснилось, что количество итераций = количество делений оптимальное число
-        for(int j = 0; j < div_vec - 1; j++){
-            if ((v.at(j).at((n/div_vec - 1)) >= v.at(j+1).at(0)) || (v.at(j).at(0) > v.at(j+1).at(0))
-                    || (v.at(j).at(n/div_vec - 1) > v.at(j+1).at(n/div_vec - 1)) || (v.at(j).at(0) > v.at(j+1).at(n/div_vec - 1))){
-                combAndSortVec(v.at(j), v.at(j+1));
-                std::cout << "\n";
-                std::cout << "Array: " << std::endl; //вывод отсортированного вектора
-                for (int k = 0; k < div_vec; ++k){
-                    for (int m = 0; m < (n / div_vec); ++m){
-                        std::cout << v.at(k).at(m) << " ";
-                    }
-                    std::cout << "\n";
-                }
+    for (int i = 0; i < div_vec; ++i){
+        sortArray(v.at(i), int(n/div_vec));
+    }
+    std::cout << "\n";
+    std::cout << "Array sort parts: " << std::endl; //вывод отсортированного вектора
+    for (int k = 0; k < div_vec; ++k){
+        for (int m = 0; m < (n / div_vec); ++m){
+            std::cout << v.at(k).at(m) << " ";
+        }
+        std::cout << "\n";
+    }
+    for(int i = 0; i < div_vec - 1; ++i){
+        for(int j = i; j < div_vec; ++j){
+            if(i == j){
+                j++;
+            }
+            if ((v.at(i).at((n/div_vec - 1)) > v.at(j).at(0)) || (v.at(i).at(0) > v.at(j).at(0))
+                    || (v.at(i).at(n/div_vec - 1) > v.at(j).at(n/div_vec - 1)) || (v.at(i).at(0) > v.at(j).at(n/div_vec - 1))){
+                combAndSortVec(v.at(i), v.at(j));
                 outTable(v, div_vec, n);
             }
         }
     }
+    std::cout << "\n";
+    std::cout << "Array sort: " << "\n";
     end = omp_get_wtime();
+    for (int k = 0; k < div_vec; ++k){
+        for (int m = 0; m < (n / div_vec); ++m){
+            std::cout << v.at(k).at(m) << " ";
+        }
+        std::cout << "\n";
+    }
+    std::cout << "\n";
     std::cout << "Work took seconds: " <<  double(end - start) << "\n";
 }
