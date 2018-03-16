@@ -89,7 +89,7 @@ int main(){
         sortArray(v.at(i), int(n/div_vec));
     }
     std::cout << "\n";
-    std::cout << "Array sort parts: " << std::endl; //вывод отсортированного вектора
+    std::cout << "Array sort parts: " << std::endl; //вывод отсортированых частей вектора
     for (int k = 0; k < div_vec; ++k){
         for (int m = 0; m < (n / div_vec); ++m){
             std::cout << v.at(k).at(m) << " ";
@@ -104,12 +104,12 @@ int main(){
             if ((v.at(i).at((n/div_vec - 1)) > v.at(j).at(0)) || (v.at(i).at(0) > v.at(j).at(0))
                     || (v.at(i).at(n/div_vec - 1) > v.at(j).at(n/div_vec - 1)) || (v.at(i).at(0) > v.at(j).at(n/div_vec - 1))){
                 combAndSortVec(v.at(i), v.at(j));
-                outTable(v, div_vec, n);
+                outTable(v, div_vec, n); //вывод таблицы
             }
         }
     }
     std::cout << "\n";
-    std::cout << "Array sort: " << "\n";
+    std::cout << "Array sort: " << "\n"; //конечный отсортированный вектор
     end = omp_get_wtime();
     for (int k = 0; k < div_vec; ++k){
         for (int m = 0; m < (n / div_vec); ++m){
