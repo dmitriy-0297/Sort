@@ -52,7 +52,7 @@ void combAndSortVec(std::vector<int>& v_1, std::vector<int>& v_2){ //сорти�
     }
 }
 
-void randArray(std::vector<int>& Array, int n){
+void randArray(std::vector<int>& Array, int n){ //запоняем массив
     for (int i = 0; i < n; i++){ // формируем значения исходного массива
         Array.push_back(rand() % 100);
     }
@@ -63,14 +63,13 @@ void randArray(std::vector<int>& Array, int n){
     std::cout << "\n";
 }
 
-void outTable(std::vector<std::vector<int> > v, int div_vec, int n){
+void outTable(std::vector<std::vector<int> > v, int div_vec, int n){ //вывод таблицы
     std::cout << "\n";
     std::cout << "Table:" << "\n";
     for (int i = 0; i < int(v.size()); i++){
         std::cout << v.at(i).at(0) << " " << v.at(i).at(n/div_vec-1);
         std::cout << '\n';
     }
-    //std::cout << '\n';
 }
 
 int main(){
