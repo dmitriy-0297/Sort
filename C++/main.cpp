@@ -73,6 +73,7 @@ void outTable(std::vector<std::vector<int> > v, int div_vec, int n){ //выво�
 }
 
 int main(){
+    int countIter = 0;
     double start, end;
     int n = 0; //размер основного массива
     int div_vec = 0; //на сколько делин исходный массив
@@ -95,6 +96,7 @@ int main(){
         }
         std::cout << "\n";
     }
+    outTable(v, div_vec, n);
     for(int i = 0; i < div_vec - 1; ++i){
         for(int j = i; j < div_vec; ++j){
             if(i == j){
@@ -102,7 +104,11 @@ int main(){
             }
             if ((v.at(i).at((n/div_vec - 1)) > v.at(j).at(0)) || (v.at(i).at(0) > v.at(j).at(0))
                     || (v.at(i).at(n/div_vec - 1) > v.at(j).at(n/div_vec - 1)) || (v.at(i).at(0) > v.at(j).at(n/div_vec - 1))){
+                std::cout << "\n";
+                std::cout << "two parts sort: " << "\n";
+                std::cout << i + 1 << " whith " << j + 1 << "\n";
                 combAndSortVec(v.at(i), v.at(j));
+                countIter++;
                 outTable(v, div_vec, n); //вывод таблицы
             }
         }
@@ -114,8 +120,8 @@ int main(){
         for (int m = 0; m < (n / div_vec); ++m){
             std::cout << v.at(k).at(m) << " ";
         }
-        std::cout << "\n";
     }
     std::cout << "\n";
     std::cout << "Work took seconds: " <<  double(end - start) << "\n";
+    std::cout << "Count Iterations: " << countIter <<  "\n";
 }
