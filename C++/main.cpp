@@ -4,48 +4,42 @@
 #include <omp.h>
 #include "sort.h"
 
+void intDivVec(std::vector<int> arr, std::vector<std::vector<int> > &v, int n, int div_vec){ //функция для добавления
+// в vec[vec] целочисленной части от деления массива
+    for (int i = 0; i < div_vec; ++i){
+        std::vector<int> vec;
+        v.push_back(vec);
+    }
+    for(int k = 0; k < n; ++k){
+        for(int i = 0; i < div_vec; ++i){
+            for(int j = 0; j < (n / div_vec); ++j){
+                v.at(i).push_back(arr[k]);
+                ++k;
+            }
+        }
+    }
+}
+
 std::vector<std::vector<int> > divVec(std::vector<int> arr, int n, int div_vec){ // создание v[vec]
-    std::vector<std::vector<int> > v;
-    if (n % div_vec){ //если деление на части нецелочисленно
-      for (int i = 0; i < div_vec; ++i){
-          std::vector<int> vec;
-          v.push_back(vec);
-      }
-      for(int k = 0; k < n; ++k){
-          for(int i = 0; i < div_vec; ++i){
-              for(int j = 0; j < (n / div_vec); ++j){
-                  v.at(i).push_back(arr[k]);
-                  ++k;
+      std::vector<std::vector<int> > v;
+      if (n % div_vec){ //если деление на части нецелочисленно
+        intDivVec(arr, v, n, div_vec); //добвляем целочисленную часть
+        int intDivPart = int(v.size()) * int(v.at(0).size()) ; //size части вектора которая целовисленно делиться
+        std::vector<int> vec;
+        v.push_back(vec);
+        for(int i = intDivPart; i < n; ++i){
+          v.at(div_vec).push_back(arr.at(i));
+        }
+        std::cout << '\n';
+        std::cout << "Vector[vector]: " << std::endl;
+        for (int i = 0; i < int(v.size()); ++i){
+            for (int j = 0; j < int(v.at(i).size()); ++j){
+                std::cout << v.at(i).at(j) << " ";
               }
-          }
-      }
-      int intDivPart = int(v.size()) * int(v.at(0).size()) ; //size части вектора которая целовисленно делиться
-      std::vector<int> vec;
-      v.push_back(vec);
-      for(int i = intDivPart; i < n; ++i){
-        v.at(div_vec).push_back(arr.at(i));
-      }
-      std::cout << '\n';
-      std::cout << "Vector[vector]: " << std::endl;
-      for (int i = 0; i < int(v.size()); ++i){
-          for (int j = 0; j < int(v.at(i).size()); ++j){
-              std::cout << v.at(i).at(j) << " ";
-          }
-          std::cout << "\n";
+            std::cout << "\n";
       }
     }else{ //деление на части целочисленно
-      for (int i = 0; i < div_vec; ++i){
-          std::vector<int> vec;
-          v.push_back(vec);
-      }
-      for(int k = 0; k < n; ++k){
-          for(int i = 0; i < div_vec; ++i){
-              for(int j = 0; j < (n / div_vec); ++j){
-                  v.at(i).push_back(arr[k]);
-                  ++k;
-              }
-          }
-      }
+      intDivVec(arr, v, n, div_vec); //добвляем целочисленную часть
       std::cout << '\n';
       std::cout << "Vector[vector]: " << std::endl; //выводим вектор векторов
       for (int i = 0; i < div_vec; ++i){
