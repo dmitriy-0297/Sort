@@ -52,9 +52,9 @@ std::vector<std::vector<int> > divVec(std::vector<int> arr, int n, int div_vec){
           for (int j = 0; j < (n / div_vec); ++j){
               std::cout << v.at(i).at(j) << " ";
           }
-          std::cout << "\n";
+        std::cout << "\n";
       }
-  }
+    }
     return v;
 }
 
