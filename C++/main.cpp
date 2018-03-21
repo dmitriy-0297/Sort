@@ -2,7 +2,7 @@
 #include <cstdlib>
 #include <vector>
 #include <omp.h>
-#include "sort.h"
+#include "sort_std.h"
 
 void intDivVec(std::vector<int> arr, std::vector<std::vector<int> > &v, int n, int div_vec){ //функция для добавления
 // в vec[vec] целочисленной части от деления массива
@@ -20,7 +20,7 @@ void intDivVec(std::vector<int> arr, std::vector<std::vector<int> > &v, int n, i
     }
 }
 
-std::vector<std::vector<int> > divVec(std::vector<int> arr, int n, int div_vec){ // создание v[vec]
+std::vector<std::vector<int> > divVec(std::vector<int> arr, int n, int div_vec, char out){ // создание v[vec]
       std::vector<std::vector<int> > v;
       if (n % div_vec){ //если деление на части нецелочисленно
         intDivVec(arr, v, n, div_vec); //добвляем целочисленную часть
@@ -30,6 +30,7 @@ std::vector<std::vector<int> > divVec(std::vector<int> arr, int n, int div_vec){
         for(int i = intDivPart; i < n; ++i){
           v.at(div_vec).push_back(arr.at(i));
         }
+        if(out == 'y'){
         std::cout << '\n';
         std::cout << "Vector[vector]: " << std::endl;
         for (int i = 0; i < int(v.size()); ++i){
@@ -38,8 +39,10 @@ std::vector<std::vector<int> > divVec(std::vector<int> arr, int n, int div_vec){
               }
             std::cout << "\n";
       }
+    }
     }else{ //деление на части целочисленно
       intDivVec(arr, v, n, div_vec); //добвляем целочисленную часть
+      if(out == 'y'){
       std::cout << '\n';
       std::cout << "Vector[vector]: " << std::endl; //выводим вектор векторов
       for (int i = 0; i < div_vec; ++i){
@@ -49,7 +52,8 @@ std::vector<std::vector<int> > divVec(std::vector<int> arr, int n, int div_vec){
         std::cout << "\n";
       }
     }
-    return v;
+  }
+  return v;
 }
 
 void combAndSortVec(std::vector<int>& v_1, std::vector<int>& v_2){ //сортировка 2 частей массива
@@ -96,6 +100,13 @@ void outTable(std::vector<std::vector<int> > v, int div_vec, int n){ //выво�
 }
 
 int main(){
+    char out;//узнаем у пользователя стоит ли выводить промежуточные результаты или нет
+    std::cout << "Output table and sort parts? (y/n): ";
+    std::cin >> out;
+    if (out != 'y' && out != 'n'){
+      std::cout << "Error input n/y ..." << std::endl;
+      return 0;
+    }
     int countIter = 0;
     double start, end; //переменные для замера времени
     int n = 0; //размер основного массива
@@ -106,39 +117,46 @@ int main(){
     std::cin >> div_vec;
     std::vector<int> Array;
     randArray(Array, n); //заполнение исходного массива
-    std::vector<std::vector <int> > v(divVec(Array, n, div_vec)); //разбиение исходного массива на части
+    std::vector<std::vector <int> > v(divVec(Array, n, div_vec, out)); //разбиение исходного массива на части
     start = omp_get_wtime(); //начало сортировки
     for (int i = 0; i < int(v.size()); ++i){ //сортируем каждую часть массива
         sortArray(v.at(i), int(n/div_vec));
     }
-    std::cout << "\n";
-    std::cout << "Array sort parts: " << std::endl; //вывод отсортированых частей вектора
-    for (int k = 0; k < int(v.size()); ++k){
-        for (int m = 0; m < int(v.at(k).size()); ++m){
-            std::cout << v.at(k).at(m) << " ";
+    if(out == 'y'){
+      std::cout << "\n";
+      std::cout << "Array sort parts: " << std::endl; //вывод отсортированых частей вектора
+      for (int k = 0; k < int(v.size()); ++k){
+          for (int m = 0; m < int(v.at(k).size()); ++m){
+              std::cout << v.at(k).at(m) << " ";
+            }
+            std::cout << "\n";
+          }
+          outTable(v, div_vec, n); //вывод таблицы
         }
-        std::cout << "\n";
-    }
-    outTable(v, div_vec, n); //вывод таблицы
     for(int i = 0; i < int(v.size()) - 1; ++i){
         for(int j = i; j < int(v.size()); ++j){
             if(i == j){
                 j++;
             }
+            #pragma omp paralle //раралелим проверку
             if ((v.at(i).at((n/div_vec - 1)) > v.at(j).at(0)) || (v.at(i).at(0) > v.at(j).at(0)) //условие для проверки, отсортирован ли массив
                     || (v.at(i).at(n/div_vec - 1) > v.at(j).at(n/div_vec - 1)) || (v.at(i).at(0) > v.at(j).at(n/div_vec - 1))){
+                if (out == 'y'){
                 std::cout << "\n";
                 std::cout << "two parts sort: " << "\n"; //вывод номеров строк таблицы, которы будут отсортированны между собой
                 std::cout << i + 1 << " whith " << j + 1 << "\n";
+                }
                 combAndSortVec(v.at(i), v.at(j)); //вызов функции сортировки для 2 частей массива
                 countIter++;
+                if (out == 'y'){
                 outTable(v, div_vec, n); //вывод таблицы
+              }
             }
         }
     }
+    end = omp_get_wtime();
     std::cout << "\n";
     std::cout << "Array sort: " << "\n"; //конечный отсортированный вектор
-    end = omp_get_wtime();
     for (int k = 0; k < int(v.size()); ++k){
         for (int m = 0; m < int(v.at(k).size()); ++m){
             std::cout << v.at(k).at(m) << " ";
