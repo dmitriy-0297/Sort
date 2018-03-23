@@ -34,8 +34,8 @@ std::vector<std::vector<int> > divVec(std::vector<int> arr, int n, int div_vec, 
         if(out == 'y'){
             std::cout << '\n';
             std::cout << "Vector[vector]: " << std::endl;
-            for (int i = 0; i < div_vec; ++i){
-                for (int j = 0; j < (n/div_vec); ++j){
+            for (int i = 0; i < int(v.size()); ++i){
+                for (int j = 0; j < int(v.at(i).size()); ++j){
                     std::cout << v.at(i).at(j) << " ";
                 }
                 std::cout << "\n";
