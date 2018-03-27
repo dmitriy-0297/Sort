@@ -137,7 +137,6 @@ int main(){
             if(i == j){
                 j++;
             }
-            #pragma omp paralle //раралелим проверку
             if ((v.at(i).at((n/div_vec - 1)) > v.at(j).at(0)) || (v.at(i).at(0) > v.at(j).at(0)) //условие для проверки, отсортирован ли массив
                     || (v.at(i).at(n/div_vec - 1) > v.at(j).at(n/div_vec - 1)) || (v.at(i).at(0) > v.at(j).at(n/div_vec - 1))){
                 if (out == 'y'){
