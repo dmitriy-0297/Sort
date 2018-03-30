@@ -104,7 +104,7 @@ void sort(std::vector<int> ind, std::vector<std::vector<int> >& v, int n, int di
     for(int i = 0; i < int(ind.size()) - 1; i++){
         for(int j = i + 1; j < int(ind.size()); j++){
             if(ind.at(i) >= 0 && ind.at(j) >= 0){
-                if ((v.at(i).at((n/div_vec - 1)) > v.at(j).at(0))){
+                if ((v.at(i).at(n/div_vec - 1) > v.at(j).at(0))){
                     flag = true;
                     if (out == 'y'){
                         std::cout << "\n";
@@ -122,13 +122,15 @@ void sort(std::vector<int> ind, std::vector<std::vector<int> >& v, int n, int di
             }
         }
     }
-    #pragma omp parallel for
-    for(int i = 0; i < int(vecPair_1.size()); ++i){
-        //std::cout << omp_get_thread_num() << std::endl;
-        combAndSortVec(v.at(vecPair_1.at(i)), v.at(vecPair_2.at(i)));
+    int i = 0;
+    #pragma omp parallel
+    {
+    #pragma omp for private(i)
+    for(i = 0; i < int(vecPair_1.size()); ++i){
+      //std::cout << omp_get_thread_num() << std::endl;
+      combAndSortVec(v.at(vecPair_1.at(i)), v.at(vecPair_2.at(i)));
     }
-    vecPair_1.clear();
-    vecPair_2.clear();
+  }
 }
 
 int main(){
@@ -155,7 +157,6 @@ int main(){
     std::vector<int> Array;
     randArray(Array, n); //заполнение исходного массива
     std::vector<std::vector <int> > v(divVec(Array, n, div_vec, out)); //разбиение исходного массива на части
-    start = omp_get_wtime(); //начало сортировки
     int threadsCount = omp_get_num_procs();
     omp_set_num_threads(threadsCount);
     #pragma omp parallel for
@@ -176,8 +177,9 @@ int main(){
     for (int i = 0; i < int(v.size()); i++){
         ind.push_back(i);
     }
+    start = omp_get_wtime(); //начало сортировки
     bool flag = false;
-    for(int g = 0; g < int(v.size()) * int(v.size()); g++){
+    for(int g = 0; ; g++){
         countIter++;
         if(g == 0){
             flag = true;
