@@ -12,6 +12,7 @@ void intDivVec(std::vector<int> arr, std::vector<std::vector<int> > &v, int n, i
         std::vector<int> vec;
         v.push_back(vec);
     }
+
     for(int k = 0; k < sizeIntParts; ++k){
         for(int i = 0; i < div_vec; ++i){
             for(int j = 0; j < (n / div_vec); ++j){
@@ -99,28 +100,35 @@ void outTable(std::vector<std::vector<int> > v){ //вывод таблицы в,
     }
 }
 
-void sort(std::vector<int> ind, std::vector<std::vector<int> >& v, int n, int div_vec, int& flag, char out){
-  for(int i = 0; i < int(ind.size()) - 1; ++i){
-      for(int j = i; j < int(ind.size()); ++j){
-          if(i == j){
-              j++;
-          }
-          if ((v.at(i).at((n/div_vec - 1)) > v.at(j).at(0)) || (v.at(i).at(0) > v.at(j).at(0))) {//условие для проверки, отсортирован ли массив
-              if (out == 'y'){
-                  std::cout << "\n";
-                  std::cout << "two parts sort: " << "\n"; //вывод номеров строк таблицы, которы будут отсортированны между собой
-                  std::cout << i + 1 << " whith " << j + 1 << "\n";
-              }
-              combAndSortVec(v.at(i), v.at(j)); //вызов функции сортировки для 2 частей массива
-              flag++;
-              ind.erase(ind.begin() + i);
-              ind.erase(ind.begin() + j - 1);
-              if (out == 'y'){
-                  outTable(v); //вывод таблицы
-          }
+void sort(std::vector<int> ind, std::vector<std::vector<int> >& v, int n, int div_vec, bool& flag, char out, std::vector<int> vecPair_1, std::vector<int> vecPair_2){
+    for(int i = 0; i < int(ind.size()) - 1; i++){
+        for(int j = i + 1; j < int(ind.size()); j++){
+            if(ind.at(i) >= 0 && ind.at(j) >= 0){
+                if ((v.at(i).at((n/div_vec - 1)) > v.at(j).at(0))){
+                    flag = true;
+                    if (out == 'y'){
+                        std::cout << "\n";
+                        std::cout << "two parts sort: " << "\n"; //вывод номеров строк таблицы, которы будут отсортированны между собой
+                        std::cout << i + 1 << " whith " << j + 1 << "\n";
+                    }
+                    vecPair_1.push_back(ind.at(i));
+                    vecPair_2.push_back(ind.at(j));
+                    ind.at(i) = -1;
+                    ind.at(j) = -1;
+                    if (out == 'y'){
+                        outTable(v); //вывод таблицы
+                    }
+                }
+            }
         }
-      }
     }
+    #pragma omp parallel for
+    for(int i = 0; i < int(vecPair_1.size()); ++i){
+        //std::cout << omp_get_thread_num() << std::endl;
+        combAndSortVec(v.at(vecPair_1.at(i)), v.at(vecPair_2.at(i)));
+    }
+    vecPair_1.clear();
+    vecPair_2.clear();
 }
 
 int main(){
@@ -141,13 +149,16 @@ int main(){
     std::cout << "Enter size parts ";
     std::cin >> sizeParts;
     div_vec = n/sizeParts;
+    std::vector<int> vecPair_1; //вектор найденых пар
+    std::vector<int> vecPair_2;
+    std::vector<int> ind; //вектор индексов
     std::vector<int> Array;
     randArray(Array, n); //заполнение исходного массива
     std::vector<std::vector <int> > v(divVec(Array, n, div_vec, out)); //разбиение исходного массива на части
     start = omp_get_wtime(); //начало сортировки
     int threadsCount = omp_get_num_procs();
     omp_set_num_threads(threadsCount);
-    #pragma omp parallel for //паралелим сортировку каждой части отдельно
+    #pragma omp parallel for
     for (int i = 0; i < int(v.size()); ++i){ //сортируем каждую часть массива
         sortArray(v.at(i));
     }
@@ -162,21 +173,21 @@ int main(){
         }
         outTable(v); //вывод таблицы
     }
-    std::vector<int> ind; //вектор индексов
     for (int i = 0; i < int(v.size()); i++){
-      ind.push_back(i);
+        ind.push_back(i);
     }
-    int flag = 1;
-    #pragma omp parallel for
-    for(int g = 0; g < g + 1; g++){
-      //std::cout << omp_get_thread_num() << std::endl;
-      if (flag > 0){
-        flag = 0;
+    bool flag = false;
+    for(int g = 0; g < int(v.size()) * int(v.size()); g++){
         countIter++;
-      sort(ind, v, n, div_vec, flag, out);
-    }else{
-      continue;
-    }
+        if(g == 0){
+            flag = true;
+        }
+        if (flag == true){
+            flag = false;
+            sort(ind, v, n, div_vec, flag, out, vecPair_1, vecPair_2);
+        }else{
+            break;
+        }
     }
     end = omp_get_wtime();
     std::cout << "\n";
