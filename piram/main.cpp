@@ -3,7 +3,8 @@
 #include <vector>
 #include <omp.h>
 #include <cmath>
-#include "sort_std.h"
+#include "sort.h"
+#include "sort_pir.h"
 
 void intDivVec(std::vector<int> arr, std::vector<std::vector<int> > &v, int n, int div_vec){ //функция для добавления
     // в vec[vec] целочисленной части от деления массива
@@ -68,7 +69,7 @@ void combAndSortVec(std::vector<int>& v_1, std::vector<int>& v_2){ //сорти�
     for(int i = 0; i < int(v_2.size()); i++){
         v.push_back(v_2[i]);
     }
-    sortArray(v);
+    sortArray(v, int(v.size()));
     v_1.clear();
     v_2.clear();
     for (int i = 0; i < int(v.size()); ++i){
@@ -104,16 +105,16 @@ void sort(std::vector<int> ind, std::vector<std::vector<int> >& v, int n, int di
     for(int i = 0; i < int(ind.size()) - 1; i++){
         for(int j = i + 1; j < int(ind.size()); j++){
             if(ind.at(i) >= 0 && ind.at(j) >= 0){
-                if ((v.at(i).at(n/div_vec - 1) > v.at(j).at(0))){
-                    flag = true;//меняю значение флага для выхода из бесконечного цикла
+                if ((v.at(i).at((n/div_vec - 1)) > v.at(j).at(0))){
+                    flag = true;
                     if (out == 'y'){
                         std::cout << "\n";
                         std::cout << "two parts sort: " << "\n"; //вывод номеров строк таблицы, которы будут отсортированны между собой
                         std::cout << i + 1 << " whith " << j + 1 << "\n";
                     }
-                    vecPair_1.push_back(ind.at(i));//добавления в вектора пар
+                    vecPair_1.push_back(ind.at(i));
                     vecPair_2.push_back(ind.at(j));
-                    ind.at(i) = -1; //моделирую удаление элемента
+                    ind.at(i) = -1;
                     ind.at(j) = -1;
                     if (out == 'y'){
                         outTable(v); //вывод таблицы
@@ -122,15 +123,13 @@ void sort(std::vector<int> ind, std::vector<std::vector<int> >& v, int n, int di
             }
         }
     }
-    int i = 0;
-    #pragma omp parallel
-    {
-    #pragma omp for private(i)
-    for(i = 0; i < int(vecPair_1.size()); ++i){
-      //std::cout << omp_get_thread_num() << std::endl;
-      combAndSortVec(v.at(vecPair_1.at(i)), v.at(vecPair_2.at(i)));
+    //#pragma omp parallel for
+    for(int i = 0; i < int(vecPair_1.size()); ++i){
+        //std::cout << omp_get_thread_num() << std::endl;
+        combAndSortVec(v.at(vecPair_1.at(i)), v.at(vecPair_2.at(i)));
     }
-  }
+    vecPair_1.clear();
+    vecPair_2.clear();
 }
 
 int main(){
@@ -157,11 +156,12 @@ int main(){
     std::vector<int> Array;
     randArray(Array, n); //заполнение исходного массива
     std::vector<std::vector <int> > v(divVec(Array, n, div_vec, out)); //разбиение исходного массива на части
+    start = omp_get_wtime(); //начало сортировки
     int threadsCount = omp_get_num_procs();
     omp_set_num_threads(threadsCount);
-    #pragma omp parallel for
+    //#pragma omp parallel for
     for (int i = 0; i < int(v.size()); ++i){ //сортируем каждую часть массива
-        sortArray(v.at(i));
+        sortArray(v.at(i), v.at(i).size());//sortArray(v.at(i),int(v.at(i).size()));
     }
     if(out == 'y'){
         std::cout << "\n";
@@ -177,22 +177,20 @@ int main(){
     for (int i = 0; i < int(v.size()); i++){
         ind.push_back(i);
     }
-    start = omp_get_wtime(); //начало сортировки
-    bool flag = false;//флагЮ для остановки бесконечного цикла
-    for(int g = 0; ; g++){//цикл реализован для подсчета итераций
-        countIter++;//ссчетчик итераций
+    bool flag = false;
+    for(int g = 0; g < int(v.size()) * int(v.size()); g++){
+        countIter++;
         if(g == 0){
             flag = true;
         }
         if (flag == true){
             flag = false;
-            sort(ind, v, n, div_vec, flag, out, vecPair_1, vecPair_2); //вызов
+            sort(ind, v, n, div_vec, flag, out, vecPair_1, vecPair_2);
         }else{
-            countIter--;
             break;
         }
     }
-    end = omp_get_wtime(); //конец сортировки
+    end = omp_get_wtime();
     std::cout << "\n";
     std::cout << "Array sort: " << "\n"; //конечный отсортированный вектор
     for (int k = 0; k < int(v.size()); ++k){

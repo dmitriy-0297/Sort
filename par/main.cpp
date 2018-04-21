@@ -80,7 +80,7 @@ void combAndSortVec(std::vector<int>& v_1, std::vector<int>& v_2){ //сорти�
     }
 }
 
-void randArray(std::vector<int>& Array, int n){ //запоняем массив
+inline void randArray(std::vector<int>& Array, int n){ //запоняем массив
     for (int i = 0; i < n; i++){ // формируем значения исходного массива
         Array.push_back(rand() % 100);
     }
@@ -122,15 +122,12 @@ void sort(std::vector<int> ind, std::vector<std::vector<int> >& v, int n, int di
             }
         }
     }
-    int i = 0;
-    #pragma omp parallel
-    {
-    #pragma omp for private(i)
+    int i;
+    #pragma omp parallel for proc_bind(spread) private(i) shared(vecPair_1, vecPair_2, v) schedule(static)
     for(i = 0; i < int(vecPair_1.size()); ++i){
-      //std::cout << omp_get_thread_num() << std::endl;
+      std::cout << omp_get_thread_num() << std::endl;
       combAndSortVec(v.at(vecPair_1.at(i)), v.at(vecPair_2.at(i)));
     }
-  }
 }
 
 int main(){
@@ -177,8 +174,8 @@ int main(){
     for (int i = 0; i < int(v.size()); i++){
         ind.push_back(i);
     }
+    bool flag = false;//флаг для остановки бесконечного цикла
     start = omp_get_wtime(); //начало сортировки
-    bool flag = false;//флагЮ для остановки бесконечного цикла
     for(int g = 0; ; g++){//цикл реализован для подсчета итераций
         countIter++;//ссчетчик итераций
         if(g == 0){
